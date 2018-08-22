@@ -1,0 +1,14 @@
+{
+  "name": "osx-mousekey",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "node ./app/index.js"
+  },
+  "dependencies": {
+    "jimp": "^0.3.5",
+    "robotjs": "^0.5.1",
+    "run-applescript": "^3.2.0"
+  }
+}
