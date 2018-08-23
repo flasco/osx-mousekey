@@ -1,5 +1,5 @@
 const robot = require('robotjs');
-const { screenCaptureToFile } = require('./util');
+const { screenCaptureToFile } = require('../util');
 
 class Window {
   constructor(size, position) {

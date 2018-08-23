@@ -1,7 +1,7 @@
 const { getPidByName, ergodicProcess } = require('./util');
-const { getWindowPositionByPid } = require('./util/getWindow');
+const { getWindowPositionByPid } = require('./util/window');
 
-const Window = require('./entities/window');
+const Window = require('./entities/Window');
 
 class App {
 	constructor() {

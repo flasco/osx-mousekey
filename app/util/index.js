@@ -39,18 +39,20 @@ async function ergodicProcess() {
 }
 
 function screenCaptureToFile(path, rimg, width, height) {
-  const jimg = new Jimp(width, height);
-  for (let x = 0; x < width; x++) {
-    for (let y = 0; y < height; y++) {
-      let index = (y * rimg.byteWidth) + (x * rimg.bytesPerPixel);
-      let r = rimg.image[index];
-      let g = rimg.image[index + 1];
-      let b = rimg.image[index + 2];
-      let num = (r * 256) + (g * 256 * 256) + (b * 256 * 256 * 256) + 255;
-      jimg.setPixelColor(num, x, y);
+  return new Promise((resolve, reject) => {
+    const jimg = new Jimp(width, height);
+    for (let x = 0; x < width; x++) {
+      for (let y = 0; y < height; y++) {
+        let index = (y * rimg.byteWidth) + (x * rimg.bytesPerPixel);
+        let r = rimg.image[index];
+        let g = rimg.image[index + 1];
+        let b = rimg.image[index + 2];
+        let num = (r * 256) + (g * 256 * 256) + (b * 256 * 256 * 256) + 255;
+        jimg.setPixelColor(num, x, y);
+      }
     }
-  }
-  jimg.write(path)
+    jimg.write(path, resolve);
+  });
 }
 
 exports.runScript = runScript;
