@@ -12,3 +12,6 @@ yarn install # 安装项目依赖
 ## 项目使用的库
 * robotJs
 * run-appleScript
+
+## 关于项目进展
+看个人的勤奋程度与空余时间了~
