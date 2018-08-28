@@ -1,70 +1,84 @@
 const { runScript } = require('./index');
 
-exports.initWindowPositionByPid = async (pid) => {
+async function runScriptByPid(pid, innerScript) {
   const script = `
-  tell application "System Events"
-    set proc to item 1 of (processes whose unix id is ${pid})
-    tell proc
-      set position of front window to {0, 0}
+    tell application "System Events"
+      set proc to item 1 of (processes whose unix id is ${pid})
+      tell proc
+        ${innerScript}
+      end tell
     end tell
-  end tell
   `;
   return await runScript(script);
+}
+
+async function runScriptByName(processName, innerScript) {
+  const script = `
+    tell application "System Events"
+      tell process "${processName}"
+        ${innerScript}
+      end tell
+    end tell
+  `;
+  return await runScript(script);
+}
+// 初始化窗口位置 （其实没必要）
+exports.initWindowPositionByPid = async (pid) => {
+  const script = `set position of front window to {0, 0}`;
+  return await runScriptByPid(pid, script);
 }
 
 exports.initWindowPositionByName = async (processName) => {
-  const script = `
-  tell application "System Events"
-    tell process "${processName}"
-      set position of front window to {0, 0}
-    end tell
-  end tell
-  `;
-  return await runScript(script);
+  const script = `set position of front window to {0, 0}`;
+  return await runScriptByName(processName, script);
 }
 
+// 激活窗口
+exports.activateWindowByPid = async (pid) => {
+  const script = `
+    set frontmost to true
+    if windows is not {} then perform action "AXRaise" of item 1 of windows
+  `;
+  return await runScriptByPid(pid, script);
+}
 
-// 效率高
+exports.activateWindowByName = async (processName) => {
+  const script = `
+    set frontmost to true
+    if windows is not {} then perform action "AXRaise" of item 1 of windows
+  `;
+  return await runScriptByName(processName, script);
+}
+
+// 获取窗口信息
 exports.getWindowPositionByPid = async (pid) => {
   const script = `
-  tell application "System Events"
-    set proc to item 1 of (processes whose unix id is ${pid})
-    tell proc
-      set _size to size of front window
-      set _position to position of front window
-      return {_size, _position}
-    end tell
-  end tell
+    set _size to size of front window
+    set _position to position of front window
+    return {_size, _position}
   `;
-  const result = await runScript(script);
+  const result = await runScriptByPid(pid, script);
   return result !== '' ? formatToObj(result) : '';
 }
 
-// 效率低
 exports.getWindowPositionByName = async (processName) => {
   const script = `
-  tell application "System Events"
-    tell process "${processName}"
-      set _size to size of front window
-      set _position to position of front window
-      return {_size, _position}
-    end tell
-  end tell
+    set _size to size of front window
+    set _position to position of front window
+    return {_size, _position}
   `;
-  const result = await runScript(script);
+  const result = await runScriptByName(processName, script);
   return result !== '' ? formatToObj(result) : '';
 }
+// 最小化游戏窗口
+exports.setLeastWindowByPid = async (pid) => {
+  const script = `set size of front window to {803, 531}`;
+  return await runScriptByPid(pid, script);
+}
 
-exports.setLeastWindow = async (pid) => {
-  const script = `
-  tell application "System Events"
-    set proc to item 1 of (processes whose unix id is ${pid})
-    tell proc
-        set size of front window to {803, 531}
-    end tell
-  end tell
-`;
-  await runScript(script);
+exports.setLeastWindowByName = async (processName) => {
+  const script = `set size of front window to {803, 531}`;
+  return await runScriptByName(processName, script);
 }
 
 function formatToObj(result) {
