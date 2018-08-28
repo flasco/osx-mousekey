@@ -33,6 +33,20 @@ exports.initWindowPositionByName = async (processName) => {
   return await runScriptByName(processName, script);
 }
 
+exports.initWindowByPid = async (pid) => {
+  const script = `
+    set frontmost to true
+    if windows is not {} then perform action "AXRaise" of item 1 of windows
+    delay 0.4
+    set size of front window to {806, 533}
+    set _size to size of front window
+    set _position to position of front window
+    return {_size, _position}
+  `;
+  const result = await runScriptByPid(pid, script);
+  return result !== '' ? formatToObj(result) : '';
+}
+
 // 激活窗口
 exports.activateWindowByPid = async (pid) => {
   const script = `
@@ -71,14 +85,17 @@ exports.getWindowPositionByName = async (processName) => {
   return result !== '' ? formatToObj(result) : '';
 }
 // 最小化游戏窗口
-exports.setLeastWindowByPid = async (pid) => {
-  const script = `set size of front window to {803, 531}`;
-  return await runScriptByPid(pid, script);
-}
-
-exports.setLeastWindowByName = async (processName) => {
-  const script = `set size of front window to {803, 531}`;
-  return await runScriptByName(processName, script);
+exports.setLeastWindow = async (pid) => {
+  const script = `
+    tell application "System Events"
+      tell process "NemuPlayer"
+        tell front window
+          set size to {806, 533}
+        end tell
+      end tell
+    end tell
+  `;
+  return await runScript(script);
 }
 
 function formatToObj(result) {
