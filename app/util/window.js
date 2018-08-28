@@ -1,6 +1,6 @@
 const { runScript } = require('./index');
 
-async function initWindowPositionByPid(pid) {
+exports.initWindowPositionByPid = async (pid) => {
   const script = `
   tell application "System Events"
     set proc to item 1 of (processes whose unix id is ${pid})
@@ -12,7 +12,7 @@ async function initWindowPositionByPid(pid) {
   return await runScript(script);
 }
 
-async function initWindowPositionByName(processName) {
+exports.initWindowPositionByName = async (processName) => {
   const script = `
   tell application "System Events"
     tell process "${processName}"
@@ -25,7 +25,7 @@ async function initWindowPositionByName(processName) {
 
 
 // 效率高
-async function getWindowPositionByPid(pid) {
+exports.getWindowPositionByPid = async (pid) => {
   const script = `
   tell application "System Events"
     set proc to item 1 of (processes whose unix id is ${pid})
@@ -41,7 +41,7 @@ async function getWindowPositionByPid(pid) {
 }
 
 // 效率低
-async function getWindowPositionByName(processName) {
+exports.getWindowPositionByName = async (processName) => {
   const script = `
   tell application "System Events"
     tell process "${processName}"
@@ -53,6 +53,18 @@ async function getWindowPositionByName(processName) {
   `;
   const result = await runScript(script);
   return result !== '' ? formatToObj(result) : '';
+}
+
+exports.setLeastWindow = async (pid) => {
+  const script = `
+  tell application "System Events"
+    set proc to item 1 of (processes whose unix id is ${pid})
+    tell proc
+        set size of front window to {803, 531}
+    end tell
+  end tell
+`;
+  await runScript(script);
 }
 
 function formatToObj(result) {
@@ -68,8 +80,3 @@ function formatToObj(result) {
     }
   };
 }
-
-exports.initWindowPositionByPid = initWindowPositionByPid;
-exports.initWindowPositionByName = initWindowPositionByName;
-exports.getWindowPositionByName = getWindowPositionByName;
-exports.getWindowPositionByPid = getWindowPositionByPid;

@@ -1,6 +1,9 @@
 const Jimp = require('jimp');
 const runApplescript = require('run-applescript');
 
+const Tesseract = require('../../tesseract');
+
+
 async function runScript(script) {
   try {
     return await runApplescript(script);
@@ -40,22 +43,47 @@ async function ergodicProcess() {
 
 function screenCaptureToFile(path, rimg, width, height) {
   return new Promise((resolve, reject) => {
-    const jimg = new Jimp(width, height);
-    for (let x = 0; x < width; x++) {
-      for (let y = 0; y < height; y++) {
-        let index = (y * rimg.byteWidth) + (x * rimg.bytesPerPixel);
-        let r = rimg.image[index];
-        let g = rimg.image[index + 1];
-        let b = rimg.image[index + 2];
-        let num = (r * 256) + (g * 256 * 256) + (b * 256 * 256 * 256) + 255;
-        jimg.setPixelColor(num, x, y);
-      }
-    }
+    const jimg = screenCaptureToJIMP(rimg, width, height);
     jimg.write(path, resolve);
+  });
+}
+
+async function screenCaptureOCR(rimg, width, height) {
+  return new Promise((resolve, reject)=> {
+    const jimg = screenCaptureToJIMP(rimg, width, height);
+    Tesseract.recognize(jimg.bitmap, {
+      lang: 'Segoe',
+      tessedit_char_whitelist: '0123456789',
+    }).then(result => {
+      resolve(result.text);
+    });
+  });
+}
+
+function screenCaptureToJIMP(rimg, width, height) {
+  const jimg = new Jimp(width, height);
+  let index, r, g, b, num = 0;
+  for (let x = 0; x < width; x++) {
+    for (let y = 0; y < height; y++) {
+      index = (y * rimg.byteWidth) + (x * rimg.bytesPerPixel);
+      r = rimg.image[index];
+      g = rimg.image[index + 1];
+      b = rimg.image[index + 2];
+      num = (r * 256) + (g * 256 * 256) + (b * 256 * 256 * 256) + 255;
+      jimg.setPixelColor(num, x, y);
+    }
+  }
+  return jimg;
+}
+
+exports.sleep = async (delay) => {
+  return new Promise((resolve, reject) => {
+    setTimeout(resolve, delay);
   });
 }
 
 exports.runScript = runScript;
 exports.getPidByName = getPidByName;
 exports.ergodicProcess = ergodicProcess;
+exports.screenCaptureOCR = screenCaptureOCR;
 exports.screenCaptureToFile = screenCaptureToFile;
